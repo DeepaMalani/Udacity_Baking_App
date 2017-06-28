@@ -135,7 +135,7 @@ public class RecipeDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
      * The interface that receives onClick messages.
      */
     public interface RecipeStepsOnClickHandler {
-        void onClick(RecipeSteps recipeSteps);
+        void onClick(List<RecipeSteps> recipeStepsList, int position);
     }
     public class ViewHolderRecipeSteps extends RecyclerView.ViewHolder implements View.OnClickListener{
 
@@ -143,18 +143,21 @@ public class RecipeDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         public ViewHolderRecipeSteps(View itemView) {
             super(itemView);
             mRecipeShortDesc = (TextView)itemView.findViewById(R.id.text_view_short_description);
+            itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
-            int adapterPosition = getAdapterPosition() ;
 
-            String shortDesc = recipeSteps.get(adapterPosition).shortDesc;
-            String description = recipeSteps.get(adapterPosition).description;
-            String videoUrl = recipeSteps.get(adapterPosition).videoUrl;
-            String thumbnailUrl = recipeSteps.get(adapterPosition).thumbnailUrl;
-            RecipeSteps recipeSteps = new RecipeSteps(shortDesc,description,videoUrl,thumbnailUrl);
-            mClickHandler.onClick(recipeSteps);
+            //To get recipe step position minus ingredient header, steps header and ingredients list
+            int adapterPosition = getAdapterPosition() - 2 - ingredients.size() ;
+
+//            String shortDesc = recipeSteps.get(adapterPosition).shortDesc;
+//            String description = recipeSteps.get(adapterPosition).description;
+//            String videoUrl = recipeSteps.get(adapterPosition).videoUrl;
+//            String thumbnailUrl = recipeSteps.get(adapterPosition).thumbnailUrl;
+//            RecipeSteps recipeSteps = new RecipeSteps(shortDesc,description,videoUrl,thumbnailUrl);
+            mClickHandler.onClick(recipeSteps,adapterPosition);
         }
     }
     public void updateIngredients(List<Recipe_Ingredients> ingredients) {

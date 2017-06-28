@@ -62,7 +62,7 @@ public class RecipeDetailFragment extends Fragment {
 
     // OnImageClickListener interface, calls a method in the host activity named onImageSelected
     public interface OnRecipeStepClickListener {
-        void onRecipeStepSelected(RecipeSteps recipeSteps);
+        void onRecipeStepSelected(List<RecipeSteps> recipeSteps,int position);
     }
 
     // Override onAttach to make sure that the container activity has implemented the callback
@@ -104,10 +104,10 @@ public class RecipeDetailFragment extends Fragment {
         mRecipeStepsAdapter.setOnItemClickListener(new RecipeDetailAdapter.RecipeStepsOnClickHandler()
         {
             @Override
-            public void onClick(RecipeSteps recipeSteps) {
+            public void onClick(List<RecipeSteps> recipeSteps,int position) {
 
                 // Trigger the callback method and pass in the position that was clicked
-                mCallback.onRecipeStepSelected(recipeSteps);
+                mCallback.onRecipeStepSelected(recipeSteps,position);
             }
         });
         return rootView;

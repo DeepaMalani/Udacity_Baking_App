@@ -24,7 +24,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".RecipeDetailActivity" />
-        <activity android:name=".RecipeStepsActivity"></activity>
+        <activity android:name=".ViewRecipeStepsActivity"></activity>
+        <receiver android:name=".RecipeStepFragment$MediaReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

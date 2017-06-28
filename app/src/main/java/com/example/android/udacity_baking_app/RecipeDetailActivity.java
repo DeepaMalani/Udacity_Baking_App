@@ -1,17 +1,23 @@
 package com.example.android.udacity_baking_app;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Toast;
 
 import com.example.android.udacity_baking_app.data.RecipeSteps;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RecipeDetailActivity extends AppCompatActivity implements RecipeDetailFragment.OnRecipeStepClickListener{
 
     // Track whether to display a two-pane or single-pane UI
     // A single-pane display refers to phone screens, and two-pane to larger tablet screens
     private boolean mTwoPane;
+    // Final Strings to store state information about the recipe step objest
+    public static final String RECIPE_STEP_LIST = "recipe_step_list";
+    public static final String RECIPE_STEP_LIST_INDEX = "list_index";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,12 +36,12 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeDet
                 // In two-pane mode, add initial description fragment to the screen
                 FragmentManager fragmentManager = getSupportFragmentManager();
 
-                // Creating a new head fragment
-                RecipeStepFragment descriptionFragment = new RecipeStepFragment();
+                // Creating a new recipe step fragment
+                RecipeStepFragment recipeStepFragment = new RecipeStepFragment();
 
                 // Add the fragment to its container using a transaction
                 fragmentManager.beginTransaction()
-                        .add(R.id.recipe_step_instruction_container, descriptionFragment)
+                        .add(R.id.recipe_step_container, recipeStepFragment)
                         .commit();
             }
         } else {
@@ -45,8 +51,34 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeDet
     }
 
     @Override
-    public void onRecipeStepSelected(RecipeSteps recipeSteps) {
+    public void onRecipeStepSelected(List<RecipeSteps> recipeSteps,int position) {
 
-        Toast.makeText(RecipeDetailActivity.this,"Recipe Steps",Toast.LENGTH_SHORT).show();
+
+        // Handle the two-pane case and replace existing fragments right when a new recipe step is selected from the master list
+        if (mTwoPane) {
+            // Create two=pane interaction
+
+            RecipeStepFragment newFragment = new RecipeStepFragment();
+            newFragment.setRecipeStepsList(recipeSteps);
+            newFragment.setRecipeStepsListIndex(position);
+            // Replace the old  fragment with a new one
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.recipe_step_container, newFragment)
+                    .commit();
+
+        }
+
+        // Handle the single-pane phone case by passing information in a Bundle attached to an Intent
+        else
+        {
+            Bundle bundle = new Bundle();
+            bundle.putParcelableArrayList(RECIPE_STEP_LIST, (ArrayList<RecipeSteps>) recipeSteps);
+            bundle.putInt(RECIPE_STEP_LIST_INDEX,position);
+            // Attach the Bundle to an intent
+            final Intent intent = new Intent(this, ViewRecipeStepsActivity.class);
+            intent.putExtras(bundle);
+            startActivity(intent);
+
+        }
     }
 }

@@ -2,5 +2,6 @@
     <string name="app_name">Baking Time</string>
     <string name="ingredients">Recipe Ingredients</string>
     <string name="recipe_steps">Recipe Steps</string>
+    <string name="next_recipe_step">Next Step</string>
 
 </resources>
