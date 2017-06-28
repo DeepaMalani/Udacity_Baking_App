@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
@@ -111,6 +112,10 @@ public class RecipeStepFragment extends Fragment implements ExoPlayer.EventListe
             // Initialize the player.
            initializePlayer(Uri.parse(videoUrl));
 
+            IntentFilter filter = new IntentFilter(Intent.ACTION_MEDIA_BUTTON);//"android.intent.action.MEDIA_BUTTON"
+            MediaReceiver r = new MediaReceiver();
+            filter.setPriority(1000); //this line sets receiver priority
+            getActivity().registerReceiver(r, filter);
 
             mRecipeDescription.setText(mRecipeSteps.get(mListIndex).description);
 
@@ -151,6 +156,8 @@ public class RecipeStepFragment extends Fragment implements ExoPlayer.EventListe
 
         // Start the Media Session since the activity is active.
         mMediaSession.setActive(true);
+
+
 
     }
 
