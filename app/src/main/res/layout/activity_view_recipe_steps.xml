@@ -1,22 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="com.example.android.udacity_baking_app.ViewRecipeStepsActivity">
 
-    <!-- The  containers for description -->
-    <FrameLayout android:id="@+id/recipe_step_container"
+<!-- The  containers for description -->
+<FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/recipe_step_container"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-       />
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+    />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button_next_step"
-        android:text="@string/next_recipe_step"/>
 
-</LinearLayout>
+
+

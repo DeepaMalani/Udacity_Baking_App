@@ -3,6 +3,7 @@
     package="com.example.android.udacity_baking_app">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -14,7 +15,7 @@
         <provider
             android:name=".data.generated.RecipeProvider"
             android:authorities="com.example.android.udacity_baking_app"
-            android:exported="false" />
+            android:exported="true" />
 
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -23,13 +24,33 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RecipeDetailActivity" />
-        <activity android:name=".ViewRecipeStepsActivity"></activity>
-        <receiver android:name=".RecipeStepFragment$MediaReceiver">
+        <activity
+            android:name=".RecipeDetailActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".ViewRecipeStepsActivity"
+            android:parentActivityName=".RecipeDetailActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"/>
+
+        <receiver android:name=".fragments.RecipeStepFragment$MediaReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".widget.RecipeIngredientsWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/recipe_ingredients_widget_info" />
+        </receiver>
+
+       <service
+        android:name=".widget.IngredientsListWidgetService"
+        android:permission="android.permission.BIND_REMOTEVIEWS" />
+        <service android:name=".widget.UpdateIngredientsService"></service>
     </application>
 
 </manifest>

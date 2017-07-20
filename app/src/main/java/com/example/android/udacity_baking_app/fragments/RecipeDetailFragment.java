@@ -1,7 +1,8 @@
-package com.example.android.udacity_baking_app;
+package com.example.android.udacity_baking_app.fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,15 +13,24 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+import android.widget.TextView;
 
+import com.example.android.udacity_baking_app.MainActivity;
+import com.example.android.udacity_baking_app.R;
+import com.example.android.udacity_baking_app.RecipeDetailAdapter;
 import com.example.android.udacity_baking_app.data.RecipeSteps;
 import com.example.android.udacity_baking_app.data.Recipe_Ingredients;
 import com.example.android.udacity_baking_app.loader.IngredientsLoader;
 import com.example.android.udacity_baking_app.loader.RecipeStepsLoader;
+import com.example.android.udacity_baking_app.widget.UpdateIngredientsService;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by Deep on 6/21/2017.
@@ -30,7 +40,12 @@ public class RecipeDetailFragment extends Fragment {
     //implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = RecipeDetailFragment.class.getSimpleName();
-    private RecyclerView mRecyclerView;
+
+    @BindView(R.id.recycler_view_recipe_steps)
+    RecyclerView mRecyclerView;
+    @BindView(R.id.text_view_servings)
+    TextView mServings;
+
     private long mRecipeId;
     private RecipeDetailAdapter mRecipeStepsAdapter;
     //Declare loader id for ingredients and recipe steps
@@ -51,7 +66,7 @@ public class RecipeDetailFragment extends Fragment {
     //Declare list for recipe steps and ingredients;
     private List<RecipeSteps> mRecipeStep;
     private List<Recipe_Ingredients> mIngredients;
-
+    public static  String RECIPE_ID_PREF_NAME = "recipe_id_pref";
 
     public RecipeDetailFragment() {
 
@@ -62,7 +77,7 @@ public class RecipeDetailFragment extends Fragment {
 
     // OnImageClickListener interface, calls a method in the host activity named onImageSelected
     public interface OnRecipeStepClickListener {
-        void onRecipeStepSelected(List<RecipeSteps> recipeSteps,int position);
+        void onRecipeStepSelected(List<RecipeSteps> recipeSteps,int position,String recipeName);
     }
 
     // Override onAttach to make sure that the container activity has implemented the callback
@@ -84,33 +99,50 @@ public class RecipeDetailFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_recipe_detail, container, false);
 
+        ButterKnife.bind(this, rootView);
         mRecipeStep = new ArrayList<RecipeSteps>();
         mIngredients = new ArrayList<Recipe_Ingredients>();
 
         Intent intent = getActivity().getIntent();
-        if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
-            mRecipeId = intent.getLongExtra(Intent.EXTRA_TEXT, 0);
-            Toast.makeText(getActivity(), "Id: " + String.valueOf(mRecipeId), Toast.LENGTH_SHORT).show();
-        }
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view_recipe_steps);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        mRecyclerView.setLayoutManager(linearLayoutManager);
-        //RecipeStepsAdapter is  for linking the data with recycler views
-        mRecipeStepsAdapter = new RecipeDetailAdapter(mIngredients, mRecipeStep,getContext());
-        //Attach adapter to recycler
-        mRecyclerView.setAdapter(mRecipeStepsAdapter);
-        //On click listener
-        mRecipeStepsAdapter.setOnItemClickListener(new RecipeDetailAdapter.RecipeStepsOnClickHandler()
-        {
-            @Override
-            public void onClick(List<RecipeSteps> recipeSteps,int position) {
+        if (intent != null && intent.hasExtra(MainActivity.RECIPE_ID)) {
+            mRecipeId = intent.getLongExtra(MainActivity.RECIPE_ID, 0);
+            final String recipeName = intent.getStringExtra(MainActivity.RECIPE_NAME);
 
-                // Trigger the callback method and pass in the position that was clicked
-                mCallback.onRecipeStepSelected(recipeSteps,position);
-            }
-        });
+            String servings = getString(R.string.servings) + ": " + intent.getStringExtra(MainActivity.SERVINGS);
+            mServings.setText(servings);
+
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
+            linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+            mRecyclerView.setLayoutManager(linearLayoutManager);
+            //RecipeStepsAdapter is  for linking the data with recycler views
+            mRecipeStepsAdapter = new RecipeDetailAdapter(mIngredients, mRecipeStep, getContext());
+            //Attach adapter to recycler
+            mRecyclerView.setAdapter(mRecipeStepsAdapter);
+            //On click listener
+            mRecipeStepsAdapter.setOnItemClickListener(new RecipeDetailAdapter.RecipeStepsOnClickHandler() {
+                @Override
+                public void onClick(List<RecipeSteps> recipeSteps, int position) {
+
+                    // Trigger the callback method and pass in the position that was clicked
+                    mCallback.onRecipeStepSelected(recipeSteps, position,recipeName);
+                }
+            });
+            //Set activity label for selected recipe
+            getActivity().setTitle(recipeName);
+
+            saveRecipeIdAndNameInPreference(mRecipeId,recipeName,servings);
+        }
         return rootView;
+    }
+
+    private void saveRecipeIdAndNameInPreference(long recipeId,String recipeName,String servings)
+    {
+        SharedPreferences.Editor editor =getActivity().getSharedPreferences(RECIPE_ID_PREF_NAME, MODE_PRIVATE).edit();
+        editor.putLong("recipeId", recipeId);
+        editor.putString("recipeName", recipeName);
+        editor.putString("servings",servings);
+        editor.commit();
+        UpdateIngredientsService.startActionUpdateIngredientWidgets(getActivity());
     }
 
     @Override

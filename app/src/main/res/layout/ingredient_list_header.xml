@@ -4,6 +4,7 @@
     android:layout_height="wrap_content"
     android:text="@string/ingredients"
     android:id="@+id/text_view_ingredient_header"
+    android:textSize="20sp"
     android:layout_marginBottom="8dp">
 
 </TextView>

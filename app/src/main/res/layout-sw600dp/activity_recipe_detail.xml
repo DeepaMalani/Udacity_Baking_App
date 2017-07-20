@@ -14,8 +14,8 @@
     <!-- The static Recipe Detail Fragment -->
     <fragment
         android:id="@+id/recipe_detail_fragment"
-        android:name="com.example.android.udacity_baking_app.RecipeDetailFragment"
-        android:layout_width="250dp"
+        android:name="com.example.android.udacity_baking_app.fragments.RecipeDetailFragment"
+        android:layout_width="280dp"
         android:layout_height="match_parent" />
 
     <!-- A small divider -->
@@ -42,6 +42,7 @@
             android:id="@+id/recipe_step_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@android:color/white"
             />
 
 

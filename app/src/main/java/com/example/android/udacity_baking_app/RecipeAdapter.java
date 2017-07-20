@@ -37,7 +37,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeAdap
      * The interface that receives onClick messages.
      */
     public interface RecipeAdapterOnClickHandler {
-        void onClick(long recipeId);
+        void onClick(long recipeId,String recipeName,String servings);
     }
     /**
      * Cache of the children views for a list item.
@@ -56,8 +56,10 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeAdap
             int adapterPosition = getAdapterPosition() ;
             mCursor.moveToPosition(adapterPosition );
             long recipeId = mCursor.getLong(MainActivity.INDEX_RECIPE_ID);
+            String recipeName = mCursor.getString(MainActivity.INDEX_RECIPE_NAME);
+            String servings =  mCursor.getString(MainActivity.INDEX_SERVINGS);
 
-            mClickHandler.onClick(recipeId);
+            mClickHandler.onClick(recipeId,recipeName,servings);
         }
     }
 

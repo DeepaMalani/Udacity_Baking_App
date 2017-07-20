@@ -152,11 +152,6 @@ public class RecipeDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             //To get recipe step position minus ingredient header, steps header and ingredients list
             int adapterPosition = getAdapterPosition() - 2 - ingredients.size() ;
 
-//            String shortDesc = recipeSteps.get(adapterPosition).shortDesc;
-//            String description = recipeSteps.get(adapterPosition).description;
-//            String videoUrl = recipeSteps.get(adapterPosition).videoUrl;
-//            String thumbnailUrl = recipeSteps.get(adapterPosition).thumbnailUrl;
-//            RecipeSteps recipeSteps = new RecipeSteps(shortDesc,description,videoUrl,thumbnailUrl);
             mClickHandler.onClick(recipeSteps,adapterPosition);
         }
     }

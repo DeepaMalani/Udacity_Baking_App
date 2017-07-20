@@ -10,7 +10,7 @@ import net.simonvt.schematic.annotation.PrimaryKey;
  * content provider baked by a database
  */
 
-public class RecipeContract {
+public final class RecipeContract {
     public static final class RecipeEntry
     {
         @DataType(DataType.Type.INTEGER)

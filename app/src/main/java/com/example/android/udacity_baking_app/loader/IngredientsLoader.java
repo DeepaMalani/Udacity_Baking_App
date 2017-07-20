@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.v4.content.AsyncTaskLoader;
 
-import com.example.android.udacity_baking_app.RecipeDetailFragment;
+import com.example.android.udacity_baking_app.fragments.RecipeDetailFragment;
 import com.example.android.udacity_baking_app.data.RecipeContract;
 import com.example.android.udacity_baking_app.data.RecipeProvider;
 import com.example.android.udacity_baking_app.data.Recipe_Ingredients;

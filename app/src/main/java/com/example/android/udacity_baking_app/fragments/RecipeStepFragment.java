@@ -1,10 +1,8 @@
-package com.example.android.udacity_baking_app;
+package com.example.android.udacity_baking_app.fragments;
 
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,8 +14,12 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.android.udacity_baking_app.MainActivity;
+import com.example.android.udacity_baking_app.R;
+import com.example.android.udacity_baking_app.RecipeDetailActivity;
 import com.example.android.udacity_baking_app.data.RecipeSteps;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -60,15 +62,20 @@ public class RecipeStepFragment extends Fragment implements ExoPlayer.EventListe
 
     @BindView(R.id.playerView) SimpleExoPlayerView mPlayerView;
     @BindView(R.id.text_view_description) TextView mRecipeDescription;
+    @BindView(R.id.button_previous) Button mButtonPrevious;
+    @BindView(R.id.button_next) Button mButtonNext;
 
     private SimpleExoPlayer mExoPlayer;
     private Unbinder unbinder;
     private List<RecipeSteps> mRecipeSteps;
     private int mListIndex;
+    private String mRecipeName;
+    private boolean mTwoPane = true;
+    private static final String TWO_PANE = "two_pane";
+    private int mState ;
 
     private static MediaSessionCompat mMediaSession;
     private PlaybackStateCompat.Builder mStateBuilder;
-    private NotificationManager mNotificationManager;
 
     public  RecipeStepFragment()
     {
@@ -81,17 +88,17 @@ public class RecipeStepFragment extends Fragment implements ExoPlayer.EventListe
         View rootView = inflater.inflate(R.layout.fragment_view_recipe_step,container,false);
         unbinder = ButterKnife.bind(this, rootView);
 
-//        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
-//        {
-//            mPlayerView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-//        }
-
         // Load the saved state if there is one
         if(savedInstanceState != null) {
             mRecipeSteps = savedInstanceState.getParcelableArrayList(RecipeDetailActivity.RECIPE_STEP_LIST);
-            mListIndex   = savedInstanceState.getInt(RECIPE_STEP_LIST_INDEX);
+            mListIndex   = savedInstanceState.getInt(RecipeDetailActivity.RECIPE_STEP_LIST_INDEX);
+            mTwoPane  = savedInstanceState.getBoolean(TWO_PANE);
+            mRecipeName = savedInstanceState.getString(MainActivity.RECIPE_NAME);
+
+
         }
         if(mRecipeSteps!=null) {
+
             String videoUrl = mRecipeSteps.get(mListIndex).videoUrl;
             String thumbnailURL = mRecipeSteps.get(mListIndex).thumbnailUrl;
 
@@ -112,15 +119,112 @@ public class RecipeStepFragment extends Fragment implements ExoPlayer.EventListe
             // Initialize the player.
            initializePlayer(Uri.parse(videoUrl));
 
-            IntentFilter filter = new IntentFilter(Intent.ACTION_MEDIA_BUTTON);//"android.intent.action.MEDIA_BUTTON"
-            MediaReceiver r = new MediaReceiver();
-            filter.setPriority(1000); //this line sets receiver priority
-            getActivity().registerReceiver(r, filter);
-
+            //Set description text
             mRecipeDescription.setText(mRecipeSteps.get(mListIndex).description);
 
         }
+        //If recipe steps is null set player view invisible
+        if(mRecipeSteps == null)
+        {
+            mPlayerView.setVisibility(View.INVISIBLE);
+        }
+        else
+            mPlayerView.setVisibility(View.VISIBLE);
+
+        //For tablets set next and previous button invisible
+        if(mTwoPane) {
+            mButtonPrevious.setVisibility(View.GONE);
+            mButtonNext.setVisibility(View.GONE);
+        }
+        else {
+            //Set next button click listener
+            if (mListIndex == mRecipeSteps.size() - 1) {
+                mButtonNext.setVisibility(View.GONE);
+            } else {
+                mButtonNext.setVisibility(View.VISIBLE);
+                mButtonNext.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        viewNextRecipeStep();
+                    }
+                });
+            }
+                if (mListIndex == 0) {
+                    mButtonPrevious.setVisibility(View.GONE);
+                } else {
+                    mButtonPrevious.setVisibility(View.VISIBLE);
+                    //Set previous button click listener
+                    mButtonPrevious.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            viewPreviousRecipeStep();
+                        }
+                    });
+                }
+            //Set activity label for selected recipe
+            getActivity().setTitle(mRecipeName);
+        }
+
         return rootView;
+    }
+
+    //Play video when app is in foreground.
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(mRecipeSteps!=null) {
+            mExoPlayer.setPlayWhenReady(true);
+        }
+    }
+
+    //Pause the player when away from activity.
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(mRecipeSteps!=null) {
+            mExoPlayer.setPlayWhenReady(false);
+        }
+    }
+
+    private void viewNextRecipeStep()
+     {
+              mListIndex = mListIndex + 1;
+              if(mListIndex < mRecipeSteps.size()) {
+                   RecipeStepFragment newFragment = new RecipeStepFragment();
+                   newFragment.setRecipeStepsList(mRecipeSteps);
+                   newFragment.setRecipeStepsListIndex(mListIndex);
+                   newFragment.setRecipeName(mRecipeName);
+                   newFragment.setTwoPane(false);
+                   // Replace the old  fragment with a new one
+                  getActivity().getSupportFragmentManager().beginTransaction()
+                           .replace(R.id.recipe_step_container, newFragment)
+                           .commit();
+               }
+              if(mListIndex == mRecipeSteps.size() - 1)
+              {
+                  mButtonNext.setVisibility(View.GONE);
+              }
+
+  }
+
+  private void viewPreviousRecipeStep()
+    {
+        mListIndex = mListIndex - 1;
+        if(mListIndex >= 0) {
+            RecipeStepFragment newFragment = new RecipeStepFragment();
+            newFragment.setRecipeStepsList(mRecipeSteps);
+            newFragment.setRecipeStepsListIndex(mListIndex);
+            newFragment.setRecipeName(mRecipeName);
+            newFragment.setTwoPane(false);
+            // Replace the old  fragment with a new one
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.recipe_step_container, newFragment)
+                    .commit();
+        }
+        if(mListIndex == 0)
+        {
+            mButtonPrevious.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -201,6 +305,17 @@ public class RecipeStepFragment extends Fragment implements ExoPlayer.EventListe
     // Setter methods for recipe step
     public void setRecipeStepsListIndex(int position) {
         mListIndex = position;
+
+    }
+
+    // Setter methods for recipe step
+    public void setRecipeName(String recipeName) {
+        mRecipeName = recipeName;
+    }
+
+    public void setTwoPane(boolean twoPane)
+    {
+        mTwoPane = twoPane;
     }
 
     /**
@@ -210,19 +325,26 @@ public class RecipeStepFragment extends Fragment implements ExoPlayer.EventListe
     public void onSaveInstanceState(Bundle currentState) {
         //currentState.putParcelable(RecipeDetailActivity.RECIPE_STEP_LIST, mRecipeSteps.get(mListIndex));
         currentState.putParcelableArrayList(RecipeDetailActivity.RECIPE_STEP_LIST, (ArrayList<RecipeSteps>) mRecipeSteps);
-        currentState.putInt(RecipeDetailActivity.RECIPE_STEP_LIST_INDEX,mListIndex);
+        currentState.putInt(RECIPE_STEP_LIST_INDEX,mListIndex);
+        currentState.putBoolean(TWO_PANE,mTwoPane);
+        currentState.putString(MainActivity.RECIPE_NAME,mRecipeName);
+
+
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
-        releasePlayer();
-        mMediaSession.setActive(false);
+        if(mRecipeSteps!=null) {
+            releasePlayer();
+            mMediaSession.setActive(false);
+        }
     }
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+
         if ((playbackState == ExoPlayer.STATE_READY) && playWhenReady) {
             mStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
                     mExoPlayer.getCurrentPosition(), 1f);
